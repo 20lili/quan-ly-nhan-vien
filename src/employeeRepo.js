@@ -2,6 +2,9 @@
 
 const { db, normalize } = require('./db');
 
+/** Cac gia tri gioi tinh hop le cho bo loc 3 nut (Tat ca | Nam | Nu). */
+const GENDERS = ['Nam', 'Nữ'];
+
 /** Danh sach phong ban (lay tu DB) de do vao o "Loc theo phong ban". */
 function listDepartments() {
   return db

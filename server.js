@@ -4,12 +4,18 @@ const path = require('node:path');
 const express = require('express');
 
 const { seed } = require('./src/seed');
-const { listDepartments, findEmployees } = require('./src/employeeRepo');
+const { GENDERS, listDepartments, findEmployees } = require('./src/employeeRepo');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const PAGE_SIZES = [5, 10, 20];
 const DEFAULT_LIMIT = 5;
+
+// Ba trang thai cua bo loc gioi tinh tren toolbar; '' nghia la "Tat ca".
+const GENDER_OPTIONS = [
+  { value: '', label: 'Tất cả' },
+  ...GENDERS.map((g) => ({ value: g, label: g })),
+];
 
 // Lan chay dau tien: tu dong nap du lieu mau neu bang con rong.
 const seedResult = seed();
@@ -40,18 +46,23 @@ app.get('/', (req, res) => {
   const q = String(req.query.q || '').trim();
   const department = String(req.query.department || '').trim();
 
+  // Gia tri la khong hop le => quay ve trang thai "Tat ca".
+  const requestedGender = String(req.query.gender || '').trim();
+  const gender = GENDERS.includes(requestedGender) ? requestedGender : '';
+
   const requestedLimit = Number(req.query.limit);
   const limit = PAGE_SIZES.includes(requestedLimit) ? requestedLimit : DEFAULT_LIMIT;
   const page = Number.parseInt(req.query.page, 10) || 1;
 
-  const result = findEmployees({ q, department, page, limit });
+  const result = findEmployees({ q, department, gender, page, limit });
 
   // Giu nguyen tu khoa tim kiem / bo loc khi bam sang trang khac.
   const buildUrl = (overrides = {}) => {
-    const state = { q, department, limit, page: result.currentPage, ...overrides };
+    const state = { q, department, gender, limit, page: result.currentPage, ...overrides };
     const params = new URLSearchParams();
     if (state.q) params.set('q', state.q);
     if (state.department) params.set('department', state.department);
+    if (state.gender) params.set('gender', state.gender);
     if (Number(state.limit) !== DEFAULT_LIMIT) params.set('limit', state.limit);
     if (Number(state.page) > 1) params.set('page', state.page);
     const query = params.toString();
@@ -62,7 +73,9 @@ app.get('/', (req, res) => {
     ...result,
     q,
     department,
+    gender,
     departments: listDepartments(),
+    genderOptions: GENDER_OPTIONS,
     pageSizes: PAGE_SIZES,
     pages: pageWindow(result.currentPage, result.totalPages),
     buildUrl,

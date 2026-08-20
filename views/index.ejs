@@ -2,6 +2,9 @@
 
   <section class="card">
     <form class="toolbar" method="GET" action="/">
+      <%# Giu lai gioi tinh dang loc khi bam nut "Tim kiem" %>
+      <input type="hidden" name="gender" value="<%= gender %>" />
+
       <div class="field field-grow">
         <label for="q">Tìm kiếm</label>
         <input
@@ -24,6 +27,19 @@
         </select>
       </div>
 
+      <div class="field">
+        <span class="field-label" id="gender-label">Giới tính</span>
+        <div class="segmented" role="group" aria-labelledby="gender-label">
+          <% genderOptions.forEach(function (opt) { %>
+            <a
+              class="seg-btn <%= opt.value === '' ? 'seg-all' : (opt.value === 'Nam' ? 'seg-male' : 'seg-female') %> <%= opt.value === gender ? 'active' : '' %>"
+              href="<%= buildUrl({ gender: opt.value, page: 1 }) %>"
+              <%- opt.value === gender ? 'aria-current="true"' : '' %>
+            ><%= opt.label %></a>
+          <% }); %>
+        </div>
+      </div>
+
       <div class="field field-narrow">
         <label for="limit">Hiển thị</label>
         <select id="limit" name="limit">
@@ -44,7 +60,8 @@
         Hiển thị <strong><%= offset + 1 %>&ndash;<%= offset + rows.length %></strong>
         trong tổng số <strong><%= total %></strong> nhân viên
         <% if (q) { %> khớp với &ldquo;<strong><%= q %></strong>&rdquo;<% } %>
-        <% if (department) { %> thuộc phòng <strong><%= department %></strong><% } %>.
+        <% if (department) { %> thuộc phòng <strong><%= department %></strong><% } %>
+        <% if (gender) { %> &mdash; giới tính <strong><%= gender %></strong><% } %>.
       <% } else { %>
         Không có nhân viên nào phù hợp với điều kiện lọc.
       <% } %>

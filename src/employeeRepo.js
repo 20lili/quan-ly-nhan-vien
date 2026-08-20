@@ -17,8 +17,9 @@ function listDepartments() {
  * Dung menh de WHERE dung chung cho ca cau dem va cau lay du lieu.
  * - q: tim theo TEN (khong dau, khong phan biet hoa thuong) HOAC SO DIEN THOAI
  * - department: loc theo phong ban
+ * - gender: '' (Tat ca) | 'Nam' | 'Nu'
  */
-function buildWhere({ q, department }) {
+function buildWhere({ q, department, gender }) {
   const conditions = [];
   const params = [];
 
@@ -32,6 +33,12 @@ function buildWhere({ q, department }) {
     params.push(department);
   }
 
+  // Chuoi rong = trang thai "Tat ca" => khong them dieu kien nao.
+  if (GENDERS.includes(gender)) {
+    conditions.push('gender = ?');
+    params.push(gender);
+  }
+
   return {
     clause: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '',
     params,
@@ -41,8 +48,8 @@ function buildWhere({ q, department }) {
 /**
  * Tra ve mot "trang" nhan vien kem thong tin phan trang.
  */
-function findEmployees({ q = '', department = '', page = 1, limit = 5 }) {
-  const { clause, params } = buildWhere({ q, department });
+function findEmployees({ q = '', department = '', gender = '', page = 1, limit = 5 }) {
+  const { clause, params } = buildWhere({ q, department, gender });
 
   const { total } = db.prepare(`SELECT COUNT(*) AS total FROM employees ${clause}`).get(...params);
 
@@ -63,4 +70,4 @@ function findEmployees({ q = '', department = '', page = 1, limit = 5 }) {
   return { rows, total, totalPages, currentPage, limit, offset };
 }
 
-module.exports = { listDepartments, findEmployees };
+module.exports = { GENDERS, listDepartments, findEmployees };

@@ -1,0 +1,116 @@
+<%- include('partials/header') %>
+
+  <section class="card">
+    <form class="toolbar" method="GET" action="/">
+      <div class="field field-grow">
+        <label for="q">Tìm kiếm</label>
+        <input
+          type="text"
+          id="q"
+          name="q"
+          value="<%= q %>"
+          placeholder="Nhập họ tên hoặc số điện thoại..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="field">
+        <label for="department">Phòng ban</label>
+        <select id="department" name="department">
+          <option value="">-- Tất cả phòng ban --</option>
+          <% departments.forEach(function (dep) { %>
+            <option value="<%= dep %>" <%= dep === department ? 'selected' : '' %>><%= dep %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="field field-narrow">
+        <label for="limit">Hiển thị</label>
+        <select id="limit" name="limit">
+          <% pageSizes.forEach(function (size) { %>
+            <option value="<%= size %>" <%= size === limit ? 'selected' : '' %>><%= size %> / trang</option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="field field-actions">
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        <a class="btn btn-ghost" href="/">Xóa lọc</a>
+      </div>
+    </form>
+
+    <p class="result-summary">
+      <% if (total > 0) { %>
+        Hiển thị <strong><%= offset + 1 %>&ndash;<%= offset + rows.length %></strong>
+        trong tổng số <strong><%= total %></strong> nhân viên
+        <% if (q) { %> khớp với &ldquo;<strong><%= q %></strong>&rdquo;<% } %>
+        <% if (department) { %> thuộc phòng <strong><%= department %></strong><% } %>.
+      <% } else { %>
+        Không có nhân viên nào phù hợp với điều kiện lọc.
+      <% } %>
+    </p>
+
+    <div class="table-wrapper">
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Họ tên</th>
+            <th>Số điện thoại</th>
+            <th class="col-gender">Giới tính</th>
+            <th>Phòng ban</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (rows.length === 0) { %>
+            <tr>
+              <td colspan="5" class="empty-row">
+                Không tìm thấy nhân viên nào. <a href="/">Xem lại toàn bộ danh sách</a>.
+              </td>
+            </tr>
+          <% } %>
+          <% rows.forEach(function (emp) { %>
+            <tr>
+              <td class="col-id"><%= emp.id %></td>
+              <td class="cell-name"><%= emp.name %></td>
+              <td><a class="phone" href="tel:<%= emp.phone %>"><%= emp.phone %></a></td>
+              <td>
+                <span class="badge badge-<%= emp.gender === 'Nam' ? 'male' : 'female' %>"><%= emp.gender %></span>
+              </td>
+              <td><span class="badge badge-dept"><%= emp.department %></span></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <nav class="pagination" aria-label="Phân trang">
+        <% if (currentPage > 1) { %>
+          <a class="page-link" href="<%= buildUrl({ page: currentPage - 1 }) %>">&laquo; Trước</a>
+        <% } else { %>
+          <span class="page-link disabled">&laquo; Trước</span>
+        <% } %>
+
+        <% pages.forEach(function (p) { %>
+          <% if (p === '...') { %>
+            <span class="page-link ellipsis">&hellip;</span>
+          <% } else if (p === currentPage) { %>
+            <span class="page-link active"><%= p %></span>
+          <% } else { %>
+            <a class="page-link" href="<%= buildUrl({ page: p }) %>"><%= p %></a>
+          <% } %>
+        <% }); %>
+
+        <% if (currentPage < totalPages) { %>
+          <a class="page-link" href="<%= buildUrl({ page: currentPage + 1 }) %>">Sau &raquo;</a>
+        <% } else { %>
+          <span class="page-link disabled">Sau &raquo;</span>
+        <% } %>
+
+        <span class="page-info">Trang <%= currentPage %>/<%= totalPages %></span>
+      </nav>
+    <% } %>
+  </section>
+
+<%- include('partials/footer') %>
